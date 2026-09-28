@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Azan Clock — the clock that calls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bone:#F2EDE2; --bone-2:#E7DFCE; --paper:#FBF8F2;
+    --ink:#16150F; --ink-2:#4B4A3E; --muted:#8A8676; --faint:#B9B3A2;
+    --night:#0B0D0A; --night-2:#12150F; --night-line:#242721;
+    --brass:#A8811F; --brass-2:#D9B44A; --brass-soft:#C9A227;
+    --verdigris:#2E5C4E;
+    --serif:'Fraunces',Georgia,serif;
+    --ui:'Plus Jakarta Sans',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --ar:'Amiri',serif;
+    --ease:cubic-bezier(.16,.84,.24,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bone);color:var(--ink);font-family:var(--ui);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:var(--brass);color:var(--bone)}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ============ shared page furniture ============ */
+  .grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.3;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.5'/></svg>")}
+  .rule{height:1px;background:var(--ink);opacity:.16}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+  h1,h2,h3,.display{font-family:var(--serif);font-weight:500;letter-spacing:-.02em;font-variation-settings:'opsz' 100}
+
+  /* reveal-on-enter, masked from below */
+  .rv{clip-path:inset(0 0 105% 0);transform:translateY(26px);opacity:0;
+    transition:clip-path 1s var(--ease),transform 1s var(--ease),opacity .8s var(--ease)}
+  .rv.rv-in{clip-path:inset(0 0 -10% 0);transform:none;opacity:1}
+
+  /* ============ ACT I — daylight ============ */
+  .act1{position:relative;background:var(--bone);padding-bottom:8vh;overflow:clip}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:55;display:flex;align-items:center;gap:18px;padding:18px 28px;
+    mix-blend-mode:normal;transition:background .4s var(--ease),color .4s var(--ease),border-color .4s var(--ease);border-bottom:1px solid transparent}
+  .nav.solid{background:rgba(11,13,10,.86);backdrop-filter:blur(16px);border-bottom-color:var(--night-line);color:var(--bone)}
+  .nav .mark{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase}
+  .nav .mark i{width:9px;height:9px;border-radius:50%;background:var(--brass);display:block}
+  .nav nav{margin-left:auto;display:flex;gap:26px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .nav nav a{color:inherit;text-decoration:none;opacity:.72;transition:opacity .25s}
+  .nav nav a:hover{opacity:1}
+  .nav.solid .btnbuy{background:var(--brass);color:#0B0D0A}
+  .btnbuy{background:var(--ink);color:var(--bone);border:0;height:38px;padding:0 18px;border-radius:99px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:transform .2s var(--ease)}
+
+  .hero{position:relative;min-height:100svh;display:block;padding:14vh 0 8vh;isolation:isolate}
+  .hero .ar-word{position:absolute;right:0;top:8vh;font-family:var(--ar);font-size:min(30vw,420px);line-height:.8;
+    color:var(--brass);opacity:.10;z-index:-1;pointer-events:none;user-select:none}
+  .hero-in{max-width:1360px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;width:100%}
+  .hero h1{font-size:clamp(46px,8.2vw,124px);line-height:.92;font-weight:300}
+  .hero h1 em{font-style:italic;font-weight:700;color:var(--brass)}
+  .hero .lede{margin-top:26px;max-width:44ch;color:var(--ink-2);font-size:16.5px}
+  .hero .meta{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .tagpill{border:1px solid rgba(22,21,15,.22);border-radius:99px;height:34px;display:flex;align-items:center;
+    padding:0 15px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+  .scroll-cue{margin-top:52px;display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+  .scroll-cue .bar{width:64px;height:1px;background:var(--faint);position:relative;overflow:hidden}
+  .scroll-cue .bar::after{content:'';position:absolute;inset:0;background:var(--brass);transform-origin:left;
+    animation:sweep 2.6s var(--ease) infinite}
+  @keyframes sweep{0%{transform:scaleX(0)}55%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:0}}
+
+  /* the giant bleeding clock — a percentage width only resolves once the cell has a real width */
+  .bigclock{position:relative;display:grid;align-items:center;width:100%;min-width:0}
+  .bigclock svg{width:150%;max-width:none;height:auto;justify-self:end;transform:translateX(22%)}
+  .bc-face{fill:none;stroke:rgba(22,21,15,.55);stroke-width:.6}
+  .bc-thin{fill:none;stroke:rgba(22,21,15,.22);stroke-width:.4}
+  .bc-tick{stroke:var(--ink);stroke-width:.6;opacity:.55}
+  .bc-tick.big{stroke-width:1.5;opacity:.95}
+  .bc-brass{fill:none;stroke:var(--brass);stroke-width:.9}
+  .bc-hand{stroke:var(--ink);stroke-linecap:round}
+  .bc-dial{fill:var(--brass)}
+  .bc-text{font-family:var(--mono);fill:var(--ink-2);font-size:6.4px;letter-spacing:.34em}
+
+  /* marquee band, editorial */
+  .band{border-top:1px solid rgba(22,21,15,.2);border-bottom:1px solid rgba(22,21,15,.2);overflow:hidden;background:var(--bone-2)}
+  .band .t{display:flex;gap:52px;width:max-content;padding:15px 0;animation:roll 42s linear infinite;
+    font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-2)}
+  @keyframes roll{to{transform:translateX(-50%)}}
+  .band b{color:var(--brass)}
+
+  /* ============ ACT II — the pinned night ============ */
+  .act2{position:relative;background:var(--night);color:var(--bone)}
+  .pinwrap{position:relative}
+  .pin{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;align-items:center}
+  .pin-in{max-width:1360px;margin:0 auto;padding:0 28px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .prayers{list-style:none;display:flex;flex-direction:column;gap:2px;position:relative}
+  .prayers::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--night-line)}
+  .prayers li{padding:16px 0 16px 26px;position:relative;opacity:.28;transition:opacity .5s var(--ease)}
+  .prayers li::before{content:'';position:absolute;left:-3px;top:50%;width:7px;height:7px;border-radius:50%;
+    background:var(--night-line);transform:translateY(-50%);transition:background .5s var(--ease),transform .5s var(--ease)}
+  .prayers li .row{display:flex;align-items:baseline;gap:16px}
+  .prayers li .nm{font-family:var(--serif);font-size:clamp(26px,3.6vw,46px);font-weight:400;letter-spacing:-.02em}
+  .prayers li .tm{font-family:var(--mono);font-size:13.5px;color:var(--muted);margin-left:auto}
+  .prayers li.on{opacity:1}
+  .prayers li.on::before{background:var(--brass-soft);transform:translateY(-50%) scale(1.5)}
+  .prayers li.on .tm{color:var(--brass-2)}
+  .night-stage{position:relative;display:grid;place-items:center}
+  .night-stage .halo{position:absolute;width:78%;aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,162,39,.15),transparent 62%)}
+  .nclock{width:min(104%,520px);height:auto;position:relative}
+  .nc-face{fill:#0E110C;stroke:#2A2D24;stroke-width:1}
+  .nc-inner{fill:none;stroke:#232620;stroke-width:.7}
+  .nc-tick{stroke:var(--brass-soft);stroke-width:1.4;stroke-linecap:round;opacity:.5}
+  .nc-tick.big{stroke-width:2.6;opacity:.95}
+  .nc-lbl{font-family:var(--mono);fill:#8C8877;font-size:7px;letter-spacing:.3em}
+  .nc-hand{stroke:var(--bone);stroke-linecap:round}
+  .nc-hand.h{stroke-width:7.4}
+  .nc-hand.m{stroke-width:4.4}
+  .nc-hand.s{stroke:var(--brass-2);stroke-width:1.4}
+  .nc-pin{fill:var(--brass)}
+  .night-legend{position:absolute;left:28px;bottom:34px;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:#6D6A5B;display:flex;gap:18px}
+  .pin-progress{position:absolute;right:28px;bottom:34px;width:180px;height:1px;background:var(--night-line);overflow:hidden}
+  .pin-progress i{display:block;height:100%;background:var(--brass-soft);transform:scaleX(0);transform-origin:left}
+  .act2 .head{max-width:1360px;margin:0 auto;padding:16vh 28px 0}
+  .act2 .head h2{font-size:clamp(38px,6vw,92px);font-weight:300;line-height:.96;max-width:22ch}
+  .act2 .head h2 em{font-style:italic;color:var(--brass-2)}
+  .act2 .head p{color:#9E9B8A;max-width:46ch;margin-top:22px}
+  .act2 .tail{max-width:1360px;margin:0 auto;padding:10vh 28px 16vh;display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
+  .act2 .tail div{border-top:1px solid var(--night-line);padding-top:18px}
+  .act2 .tail .n{font-family:var(--mono);font-size:34px;font-weight:300;letter-spacing:-.03em;color:var(--brass-2)}
+  .act2 .tail .l{margin-top:8px;font-size:13px;color:#9E9B8A;max-width:30ch}
+
+  /* ============ ACT III — the rail ============ */
+  .act3{background:var(--paper);padding:14vh 0 10vh;overflow:hidden}
+  .act3 .head{max-width:1360px;margin:0 auto;padding:0 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px}
+  .act3 .head h2{font-size:clamp(34px,5.4vw,76px);font-weight:300;line-height:.98}
+  .act3 .head h2 em{font-style:italic;color:var(--brass)}
+  .act3 .head .hint{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .railwrap{margin-top:7vh;position:relative;height:440px}
+  .rail{display:flex;gap:26px;padding:0 28px;height:100%;will-change:transform}
+  .pcard{flex:0 0 clamp(300px,32vw,420px);background:#FFFDF7;border:1px solid rgba(22,21,15,.13);
+    border-radius:3px;padding:24px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+    box-shadow:0 1px 0 rgba(22,21,15,.05),0 24px 40px -38px rgba(22,21,15,.5);
+    transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+  .pcard:hover{transform:translateY(-8px);box-shadow:0 1px 0 rgba(22,21,15,.05),0 46px 70px -46px rgba(22,21,15,.55)}
+  .pcard .idx{position:absolute;top:20px;right:24px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.2em}
+  .pcard .art{flex:1;display:grid;place-items:center;padding:8px 0}
+  .pcard .art svg{width:min(62%,196px);height:auto}
+  .pcard h3{font-size:23px;font-weight:500;line-height:1.15;border-top:1px solid rgba(22,21,15,.10);padding-top:16px}
+  .pcard .tl{color:var(--muted);font-size:13px;margin-top:6px;min-height:38px}
+  .pcard .specs{display:flex;gap:18px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(22,21,15,.14);
+    font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .pcard .buy{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+  .pcard .pr{font-family:var(--mono);font-size:16px}
+  .pcard .btnbuy{height:36px}
+  .rail-scrollbar{max-width:1360px;margin:34px auto 0;padding:0 28px}
+  .rail-scrollbar .track{height:1px;background:rgba(22,21,15,.16);position:relative}
+  .rail-scrollbar .thumb{position:absolute;top:-1px;height:3px;background:var(--ink);width:20%;transition:transform .1s linear}
+
+  /* ============ ACT IV — the specs ============ */
+  .act4{background:var(--bone);padding:12vh 0}
+  .act4 .in{max-width:1360px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:70px}
+  .act4 h2{font-size:clamp(30px,4.4vw,58px);font-weight:300;line-height:1.02}
+  .act4 h2 em{font-style:italic;color:var(--brass)}
+  .act4 .lead{margin-top:20px;color:var(--ink-2);max-width:38ch}
+  .spec-list{border-top:1px solid rgba(22,21,15,.3)}
+  .spec-list .r{display:grid;grid-template-columns:1fr auto;gap:24px;padding:19px 0;border-bottom:1px solid rgba(22,21,15,.14);align-items:baseline}
+  .spec-list .r .k{font-size:15.5px}
+  .spec-list .r .v{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);text-align:right}
+  .spec-list .r:nth-child(odd) .v{color:var(--verdigris)}
+
+  /* ============ ACT V — close ============ */
+  .act5{background:var(--night);color:var(--bone);padding:14vh 0 6vh;position:relative;overflow:hidden}
+  .act5 .ar{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font-family:var(--ar);
+    font-size:min(26vw,340px);color:var(--brass);opacity:.07;pointer-events:none;user-select:none}
+  .act5 .in{max-width:1360px;margin:0 auto;padding:0 28px;position:relative;text-align:center}
+  .act5 h2{font-size:clamp(38px,7vw,104px);font-weight:300;line-height:.98}
+  .act5 h2 em{font-style:italic;color:var(--brass-2)}
+  .act5 .price{font-family:var(--mono);font-size:14px;color:#9E9B8A;margin-top:26px;letter-spacing:.08em}
+  .act5 .cta{margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .act5 .cta .ghost{border:1px solid var(--night-line);color:var(--bone);background:none;height:52px;padding:0 24px;
+    border-radius:99px;font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+  .act5 .cta .solid{background:var(--brass);color:#0B0D0A;border:0;height:52px;padding:0 26px;border-radius:99px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+  .act5 footer{max-width:1360px;margin:14vh auto 0;padding:26px 28px 0;border-top:1px solid var(--night-line);
+    display:flex;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:#6D6A5B;flex-wrap:wrap}
+
+  /* ============ sheet ============ */
+  .scrim{position:fixed;inset:0;background:rgba(8,9,7,.62);opacity:0;pointer-events:none;transition:opacity .4s var(--ease);z-index:70}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--paper);color:var(--ink);
+    border-radius:22px 22px 0 0;transform:translateY(102%);transition:transform .55s cubic-bezier(.2,1,.24,1);
+    max-height:88svh;overflow-y:auto;padding:26px 28px calc(30px + env(safe-area-inset-bottom))}
+  .sheet.on{transform:none}
+  .sheet .grab{width:44px;height:4px;border-radius:99px;background:rgba(22,21,15,.18);margin:0 auto 20px}
+  .sheet-in{max-width:900px;margin:0 auto;display:grid;grid-template-columns:240px 1fr;gap:32px;align-items:center}
+  .sheet-in .art{display:grid;place-items:center}
+  .sheet-in .art svg{width:100%;max-width:220px;height:auto}
+  .sheet h3{font-size:30px;font-weight:500;line-height:1.1}
+  .sheet .p{font-family:var(--mono);font-size:20px;margin-top:12px}
+  .sheet .d{color:var(--muted);font-size:13.5px;margin-top:10px}
+  .sheet .qty{display:flex;align-items:center;gap:0;border:1px solid rgba(22,21,15,.2);border-radius:99px;
+    width:max-content;margin-top:18px;overflow:hidden}
+  .sheet .qty button{width:40px;height:40px;border:0;background:none;font-size:17px;cursor:pointer;color:var(--ink)}
+  .sheet .qty span{font-family:var(--mono);min-width:34px;text-align:center}
+  .sheet .go{margin-top:20px;background:var(--ink);color:var(--bone);border:0;height:50px;padding:0 24px;border-radius:99px;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;width:100%}
+  .sheet .note{margin-top:12px;font-size:12px;color:var(--muted)}
+  .sheet .note a{color:var(--verdigris)}
+  .sheet .close{position:absolute;top:20px;right:24px;border:0;background:none;font-family:var(--mono);font-size:11px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+
+  /* ============ responsive ============ */
+  @media (max-width:1024px){
+    .hero-in{grid-template-columns:1fr;gap:20px}
+    .bigclock svg{width:86%;margin:0 auto;display:block;transform:none}
+    .bigclock{justify-items:center}
+    .bigclock{order:-1}
+    .pin-in{grid-template-columns:1fr;gap:26px}
+    .night-stage{order:-1}
+    .nclock{width:min(66%,300px)}
+    .prayers li{padding:9px 0 9px 20px}
+    .prayers li .nm{font-size:24px}
+    .act4 .in{grid-template-columns:1fr;gap:30px}
+    .act2 .tail{grid-template-columns:1fr;gap:20px}
+    .railwrap{height:auto}
+    .rail{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:14px}
+    .pcard{scroll-snap-align:center}
+    .sheet-in{grid-template-columns:1fr;gap:18px}
+    .nav nav{display:none}
+  }
+  @media (max-width:560px){
+    .hero{padding-top:12vh}
+    .nav{padding:14px 18px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .rv{clip-path:none;transform:none;opacity:1;transition:none}
+    .band .t{animation:none}
+    .pinwrap{height:auto !important}
+    .pin{position:relative;height:auto;padding:8vh 0}
+    .prayers li{opacity:1}
+    .rail{overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="nav" id="nav">
+  <span class="mark"><i></i>Azan&nbsp;Clock</span>
+  <nav>
+    <a href="#calendar">The calendar</a>
+    <a href="#clocks">Clocks</a>
+    <a href="#specs">Specs</a>
+  </nav>
+  <button class="btnbuy" data-open="az-led">Order</button>
+</header>
+
+<!-- ================= ACT I ================= -->
+<section class="act1">
+  <div class="hero" id="top">
+    <div class="ar-word">الأذان</div>
+    <div class="hero-in">
+      <div>
+        <div class="kicker rv">Fajr to Isha · self-setting</div>
+        <h1 class="rv" style="margin-top:22px;transition-delay:.08s">The clock<br>that <em>calls</em>.</h1>
+        <p class="lede rv" style="transition-delay:.16s">A wall clock that keeps the Hijri date and calls all five prayers on
+          time — every day, without you touching it.</p>
+        <div class="meta rv" style="transition-delay:.24s">
+          <span class="tagpill">8 cities preset</span>
+          <span class="tagpill">Hijri + Gregorian</span>
+          <span class="tagpill">From Rp 189.000</span>
+        </div>
+        <div class="scroll-cue rv" style="transition-delay:.3s"><span class="bar"></span>Scroll — the hands move</div>
+      </div>
+      <div class="bigclock" id="heroClock"></div>
+    </div>
+  </div>
+
+  <div class="band" aria-hidden="true">
+    <div class="t">
+      <span><b>5</b> daily azan</span><span><b>Hijri</b> automatic</span><span><b>Brass</b> hands, wooden case</span>
+      <span><b>40</b> years of masjid clocks</span><span><b>Free</b> courier in town</span>
+      <span><b>5</b> daily azan</span><span><b>Hijri</b> automatic</span><span><b>Brass</b> hands, wooden case</span>
+      <span><b>40</b> years of masjid clocks</span><span><b>Free</b> courier in town</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ACT II — pinned ================= -->
+<section class="act2" id="calendar">
+  <div class="head">
+    <div class="kicker rv" style="color:#8C8877">Act II — the day</div>
+    <h2 class="rv" style="margin-top:20px;transition-delay:.06s">Five moments a day,<br>and it never <em>misses</em> one.</h2>
+    <p class="rv" style="transition-delay:.12s">Scroll through the collector's day. The clock reads the same numbers it
+      reads on your wall, in the timezone you set once.</p>
+  </div>
+
+  <div class="pinwrap" id="pinwrap" style="height:420vh">
+    <div class="pin" id="pin">
+      <div class="pin-in">
+        <ul class="prayers" id="prayers">
+          <li data-p="0"><div class="row"><span class="nm">Fajr</span><span class="tm">04:38</span></div></li>
+          <li data-p="1"><div class="row"><span class="nm">Dhuhr</span><span class="tm">11:52</span></div></li>
+          <li data-p="2"><div class="row"><span class="nm">Asr</span><span class="tm">15:12</span></div></li>
+          <li data-p="3"><div class="row"><span class="nm">Maghrib</span><span class="tm">17:58</span></div></li>
+          <li data-p="4"><div class="row"><span class="nm">Isha</span><span class="tm">19:08</span></div></li>
+        </ul>
+        <div class="night-stage">
+          <div class="halo"></div>
+          <svg class="nclock" viewBox="0 0 300 300" id="nclock">
+            <circle class="nc-face" cx="150" cy="150" r="132"/>
+            <circle class="nc-inner" cx="150" cy="150" r="120"/>
+            <g id="ncTicks"></g>
+            <text class="nc-lbl" x="150" y="86" text-anchor="middle">AZAN · AL-HARAMAIN</text>
+            <text class="nc-lbl" x="150" y="232" text-anchor="middle" id="ncDate">28 SAFAR 1448</text>
+            <line class="nc-hand h" id="nhH" x1="150" y1="150" x2="150" y2="92"/>
+            <line class="nc-hand m" id="nhM" x1="150" y1="150" x2="150" y2="54"/>
+            <line class="nc-hand s" id="nhS" x1="150" y1="162" x2="150" y2="40"/>
+            <circle class="nc-pin" cx="150" cy="150" r="4.6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="night-legend"><span id="legLeft">Section A — set your city</span><span id="legRight">Press and hold: 3 s</span></div>
+      <div class="pin-progress"><i id="pinBar"></i></div>
+    </div>
+  </div>
+
+  <div class="tail">
+    <div><div class="n" data-count="5">0</div><div class="l">Azan calls a day, at masjid volume — or muted to a light chime.</div></div>
+    <div><div class="n" data-count="8">0</div><div class="l">City presets from Jakarta to Makkah; the day resets itself.</div></div>
+    <div><div class="n" data-count="2">0</div><div class="l">Silent minutes between the call and the iqamah, yours to set.</div></div>
+  </div>
+</section>
+
+<!-- ================= ACT III — rail ================= -->
+<section class="act3" id="clocks">
+  <div class="head">
+    <div>
+      <div class="kicker rv">Act III — the clocks</div>
+      <h2 class="rv" style="margin-top:18px;transition-delay:.06s">Pick the one<br>that fits the <em>room</em>.</h2>
+    </div>
+    <div class="hint">Drag / scroll →</div>
+  </div>
+
+  <div class="railwrap">
+    <div class="rail" id="rail"></div>
+  </div>
+  <div class="rail-scrollbar"><div class="track"><div class="thumb" id="thumb"></div></div></div>
+</section>
+
+<!-- ================= ACT IV ================= -->
+<section class="act4" id="specs">
+  <div class="in">
+    <div>
+      <div class="kicker rv">Act IV — what is inside</div>
+      <h2 class="rv" style="margin-top:18px;transition-delay:.06s">Built for a <em>wall</em>,<br>not a shelf.</h2>
+      <p class="lead rv" style="transition-delay:.12s">Every part is chosen for a room that is used every day: the case,
+        the speaker, the battery that remembers the date.</p>
+    </div>
+    <div class="spec-list rv" style="transition-delay:.1s">
+      <div class="r"><span class="k">Azan memory &amp; timekeeping</span><span class="v">8 months, 2× AA</span></div>
+      <div class="r"><span class="k">Case</span><span class="v">Rattan wood, glass face</span></div>
+      <div class="r"><span class="k">Hands</span><span class="v">Solid brass, brushed</span></div>
+      <div class="r"><span class="k">Volume</span><span class="v">72 dB at 1 m</span></div>
+      <div class="r"><span class="k">Hijri offset</span><span class="v">±0 to ±3 days</span></div>
+      <div class="r"><span class="k">Cities preset</span><span class="v">Jakarta · Bandung · Surabaya · Makkah +4</span></div>
+      <div class="r"><span class="k">Mount</span><span class="v">Wall hook, 2 screws included</span></div>
+      <div class="r"><span class="k">Warranty</span><span class="v">12 months, courier pickup</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ACT V ================= -->
+<section class="act5">
+  <div class="ar">الأذان</div>
+  <div class="in">
+    <div class="kicker rv" style="color:#8C8877">Act V — the order</div>
+    <h2 class="rv" style="margin-top:20px;transition-delay:.06s">Put it on the wall.<br>We <em>deliver</em> it.</h2>
+    <div class="price rv" style="transition-delay:.12s">From Rp 189.000 · QRIS, transfer or cash to the courier</div>
+    <div class="cta rv" style="transition-delay:.18s">
+      <button class="solid" data-open="az-led">Order the LED</button>
+      <button class="ghost" data-open="az-grand">The grand edition</button>
+    </div>
+    <footer>
+      <span>Azan Clock Store · Pacet, Cianjur</span>
+      <span>Orders confirmed by WhatsApp</span>
+      <span>Delivery 1–3 days</span>
+    </footer>
+  </div>
+</section>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet">
+  <button class="close" id="sheetClose">Close</button>
+  <div class="grab"></div>
+  <div class="sheet-in" id="sheetIn"></div>
+</aside>
+
+<script>
+/* =========================================================
+   Concept design — act-structured storefront.
+   Scroll drives the clock; no libraries.
+   ========================================================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const idr = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+const PRODUCTS = [
+  { id:'az-clsc', name:'Classic — Wood', tagline:'Full azan, Hijri date, rattan case.', price:189000, specs:['Rattan','12 in','4 cities'] },
+  { id:'az-led', name:'LED Digital — Black', tagline:'Three-inch digits you can read across the room.', price:249000, specs:['3″ LED','5 azan','8 cities'], badge:'Most taken' },
+  { id:'az-hijri', name:'Hijri Premium', tagline:'Hijri and Gregorian side by side, 8 presets.', price:329000, specs:['Dual date','8 cities','72 dB'] },
+  { id:'az-square', name:'Square — Masjid', tagline:'Built for a musalla wall, loud and simple.', price:215000, specs:['Masjid','15 in','Remote'] },
+  { id:'az-grand', name:'Grand Mosque', tagline:'Remote, temperature, eight-month memory.', price:449000, specs:['Remote','Temp','8 mo'], badge:'Best' },
+];
+
+/* ---------- hand-drawn clock art (per product) ---------- */
+const BRASS = ['#C9A227', '#B8901C', '#D9B44A', '#A8811F'];
+function clockArt(p, opts) {
+  opts = opts || {};
+  let h = 0; for (let i = 0; i < p.id.length; i++) h = (h * 31 + p.id.charCodeAt(i)) % 360;
+  const accent = BRASS[Math.abs(h) % BRASS.length];
+  const square = p.id === 'az-square';
+  const led = p.id === 'az-led';
+  const ticks = Array.from({ length: 12 }, (_, i) =>
+    `<line x1="150" y1="36" x2="150" y2="${i % 3 === 0 ? 50 : 44}" stroke="${accent}"
+      stroke-width="${i % 3 === 0 ? 2.6 : 1.2}" opacity="${i % 3 === 0 ? 1 : .5}" stroke-linecap="round"
+      transform="rotate(${i * 30} 150 150)"/>`).join('');
+  if (led) {
+    return `<svg viewBox="0 0 300 300" aria-hidden="true">
+      <rect x="26" y="70" width="248" height="150" rx="10" fill="#0E110C" stroke="${accent}" stroke-width="1.4" opacity=".95"/>
+      <text x="150" y="152" text-anchor="middle" fill="${accent}" font-family="monospace" font-size="52" letter-spacing="2">4:38</text>
+      <text x="150" y="188" text-anchor="middle" fill="#8C8877" font-family="monospace" font-size="12" letter-spacing="6">FAJR</text>
+      <text x="150" y="94" text-anchor="middle" fill="#8C8877" font-family="monospace" font-size="9" letter-spacing="5">28 SAFAR 1448</text>
+      <rect x="26" y="220" width="248" height="10" rx="5" fill="${accent}" opacity=".35"/>
+    </svg>`;
+  }
+  const box = square
+    ? `<rect x="30" y="30" width="240" height="240" rx="8" fill="#0E110C" stroke="${accent}" stroke-width="1.4"/>`
+    : `<circle cx="150" cy="150" r="120" fill="#0E110C" stroke="${accent}" stroke-width="1.4"/>
+       <circle cx="150" cy="150" r="130" fill="none" stroke="${accent}" stroke-width=".6" opacity=".45"/>`;
+  return `<svg viewBox="0 0 300 300" aria-hidden="true">
+    ${box}${ticks}
+    <text x="150" y="104" text-anchor="middle" fill="${accent}" font-family="monospace" font-size="9" letter-spacing="4.5">AZAN</text>
+    <line x1="150" y1="150" x2="150" y2="88" stroke="#F2EDE2" stroke-width="6.5" stroke-linecap="round"/>
+    <line x1="150" y1="150" x2="196" y2="112" stroke="#F2EDE2" stroke-width="4.2" stroke-linecap="round"/>
+    <line x1="150" y1="150" x2="150" y2="${opts.second || 52}" stroke="${accent}" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="150" cy="150" r="4.6" fill="${accent}"/>
+  </svg>`;
+}
+
+/* ---------- ACT I: the bleeding hero clock ---------- */
+function heroClock() {
+  const ticks = Array.from({ length: 60 }, (_, i) => {
+    const big = i % 5 === 0;
+    return `<line x1="150" y1="14" x2="150" y2="${big ? 27 : 21}" class="bc-tick${big ? ' big' : ''}" transform="rotate(${i * 6} 150 150)"/>`;
+  }).join('');
+  $('#heroClock').innerHTML = `<svg viewBox="0 0 300 300" aria-hidden="true">
+    <circle class="bc-thin" cx="150" cy="150" r="146"/>
+    <circle class="bc-face" cx="150" cy="150" r="132"/>
+    <circle class="bc-brass" cx="150" cy="150" r="124"/>
+    ${ticks}
+    <text class="bc-text" x="150" y="70" text-anchor="middle">AL&#8209;HARAMAIN</text>
+    <text class="bc-text" x="150" y="238" text-anchor="middle">28 SAFAR 1448</text>
+    <line class="bc-hand" id="bhH" x1="150" y1="150" x2="150" y2="72" stroke-width="8"/>
+    <line class="bc-hand" id="bhM" x1="150" y1="150" x2="150" y2="40" stroke-width="5"/>
+    <line class="bc-hand" id="bhS" x1="150" y1="164" x2="150" y2="30" stroke-width="1.6" stroke="#A8811F"/>
+    <circle class="bc-dial" cx="150" cy="150" r="5"/>
+  </svg>`;
+}
+
+/* ---------- ACT II: ticks + the scroll-driven hands ---------- */
+function nightTicks() {
+  $('#ncTicks').innerHTML = Array.from({ length: 60 }, (_, i) => {
+    const big = i % 5 === 0;
+    return `<line x1="150" y1="20" x2="150" y2="${big ? 32 : 26}" class="nc-tick${big ? ' big' : ''}" transform="rotate(${i * 6} 150 150)"/>`;
+  }).join('');
+}
+const PRAYERS = [
+  { name: 'Fajr', h: 4, m: 38 }, { name: 'Dhuhr', h: 11, m: 52 }, { name: 'Asr', h: 15, m: 12 },
+  { name: 'Maghrib', h: 17, m: 58 }, { name: 'Isha', h: 19, m: 8 },
+];
+const angleFor = (p) => ((p.h % 12) * 30 + p.m * .5);
+function setNightHands(a) {
+  // a = 0..1 through the day; interpolate the hour hand along the five prayers
+  const seg = a * (PRAYERS.length - 1);
+  const i = clamp(Math.floor(seg), 0, PRAYERS.length - 2);
+  const t = seg - i;
+  const from = angleFor(PRAYERS[i]), to = angleFor(PRAYERS[i + 1]);
+  const hourA = from + (to - from) * t;
+  $('#nhH').setAttribute('transform', `rotate(${hourA} 150 150)`);
+  $('#nhM').setAttribute('transform', `rotate(${hourA * 6 % 360} 150 150)`);
+  $('#nhS').setAttribute('transform', `rotate(${(a * 1440) % 360} 150 150)`);
+  const active = clamp(Math.round(seg), 0, PRAYERS.length - 1);
+  $$('#prayers li').forEach((li, idx) => li.classList.toggle('on', idx === active));
+  const p = PRAYERS[active];
+  $('#legLeft').textContent = `Section ${'ABCDE'[active]} — ${p.name} ${String(p.h).padStart(2, '0')}:${String(p.m).padStart(2, '0')}`;
+  $('#legRight').textContent = active === PRAYERS.length - 1 ? 'Isha — day complete' : 'Press and hold: 3 s';
+}
+
+/* ---------- ACT III: the rail ---------- */
+function renderRail() {
+  $('#rail').innerHTML = PRODUCTS.map((p, i) => `
+    <article class="pcard">
+      <span class="idx">${String(i + 1).padStart(2, '0')}${p.badge ? ' · ' + p.badge.toUpperCase() : ''}</span>
+      <div class="art">${clockArt(p, { second: 56 - i * 4 })}</div>
+      <h3>${esc(p.name)}</h3>
+      <div class="tl">${esc(p.tagline)}</div>
+      <div class="specs">${p.specs.map((s) => `<span>${esc(s)}</span>`).join('')}</div>
+      <div class="buy">
+        <span class="pr">${idr(p.price)}</span>
+        <button class="btnbuy" data-open="${p.id}">Order</button>
+      </div>
+    </article>`).join('');
+}
+
+/* ---------- scroll engine ---------- *
+ * All section positions must be document coordinates: offsetTop is relative to
+ * the nearest positioned ancestor (the acts are position:relative), which puts
+ * the pinned act and the nav switch off by the whole height of the act above. */
+const docTop = (el) => el.getBoundingClientRect().top + window.scrollY;
+let ticking = false;
+function onScroll() {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    const y = window.scrollY, vh = window.innerHeight;
+
+    // nav turns solid only while the dark act is on screen
+    const pinTop = docTop($('#pinwrap'));
+    const act2End = docTop($('#pinwrap')) + $('#pinwrap').offsetHeight;
+    $('#nav').classList.toggle('solid', y > pinTop - vh * .5 && y < act2End - vh * .55);
+
+    // hero: hands turn, clock drifts up and out
+    if (!REDUCE) {
+      const hr = new Date();
+      const base = (hr.getHours() % 12) * 30 + hr.getMinutes() * .5;
+      const spin = clamp(y / vh, 0, 1.6) * 220;
+      $('#bhH').setAttribute('transform', `rotate(${base + spin} 150 150)`);
+      $('#bhM').setAttribute('transform', `rotate(${base * 6 % 360 + spin * 2.4} 150 150)`);
+      $('#bhS').setAttribute('transform', `rotate(${spin * 4} 150 150)`);
+      const c = $('#heroClock');
+      c.style.transform = `translateY(${-clamp(y, 0, vh) * .12}px) scale(${1 + clamp(y / vh, 0, 1) * .06})`;
+    }
+
+    // pinned night act: the wrapper is taller than the viewport and the stage is
+    // pinned for (height - vh) of it — that span is the 0..1 progress of the day.
+    const wrapEl = $('#pinwrap');
+    const dist = Math.max(wrapEl.offsetHeight - vh, 1);
+    const prog = clamp((y - docTop(wrapEl)) / dist, 0, 1);
+    setNightHands(prog);
+    $('#pinBar').style.transform = `scaleX(${prog})`;
+
+    // rail: horizontal translation on desktop
+    const rw = $('.railwrap');
+    if (window.innerWidth > 1024 && !REDUCE) {
+      const rail = $('#rail');
+      const overflow = rail.scrollWidth - window.innerWidth + 56;
+      const rp = clamp((y - (docTop(rw) - vh)) / (rw.offsetHeight + vh), 0, 1);
+      rail.style.transform = `translateX(${-overflow * rp}px)`;
+      $('#thumb').style.transform = `translateX(${rp * 400}%)`;
+    }
+
+    revealCheck();
+    ticking = false;
+  });
+}
+addEventListener('scroll', onScroll, { passive: true });
+addEventListener('resize', onScroll);
+
+/* ---------- reveal on enter + count-up ---------- *
+ * The reveal itself is a clip-path mask, which clips the element's own
+ * intersection rect to zero area — so an observer with a threshold above 0
+ * would never fire on it. Observe at threshold 0 and let `revealCheck()` in the
+ * scroll loop catch anything the observer misses. */
+function revealCheck() {
+  const vh = window.innerHeight;
+  $$('.rv:not(.rv-in)').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.top < vh * .92 && r.bottom > -40) el.classList.add('rv-in');
+  });
+}
+function reveals() {
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('rv-in'); io.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -6% 0px', threshold: 0 });
+  $$('.rv').forEach((el) => io.observe(el));
+  revealCheck();
+  const cio = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const el = e.target, to = Number(el.dataset.count) || 0;
+    let i = 0;
+    const step = () => { el.textContent = String(++i); if (i < to) setTimeout(step, 140); };
+    step(); cio.unobserve(el);
+  }), { threshold: .6 });
+  $$('[data-count]').forEach((el) => cio.observe(el));
+}
+
+/* ---------- order sheet ---------- */
+let sheetQty = 1, sheetProduct = null;
+function openSheet(id) {
+  const p = PRODUCTS.find((x) => x.id === id); if (!p) return;
+  sheetProduct = p; sheetQty = 1;
+  drawSheet();
+  $('#sheet').classList.add('on'); $('#scrim').classList.add('on');
+}
+function drawSheet() {
+  const p = sheetProduct;
+  $('#sheetIn').innerHTML = `
+    <div class="art">${clockArt(p, { second: 54 })}</div>
+    <div>
+      <div class="kicker">${esc(p.specs.join(' · '))}</div>
+      <h3 style="margin-top:12px">${esc(p.name)}</h3>
+      <div class="p">${idr(p.price * sheetQty)}</div>
+      <div class="d">${esc(p.tagline)}</div>
+      <div class="qty">
+        <button data-q="-1" aria-label="less">−</button><span>${sheetQty}</span><button data-q="1" aria-label="more">+</button>
+      </div>
+      <button class="go" id="sheetGo">Continue to checkout</button>
+      <div class="note">This is the design concept — the ordering flow lives in the live store at
+        <a href="https://azan-clock-store.vercel.app" target="_blank" rel="noopener">azan-clock-store.vercel.app</a>.</div>
+    </div>`;
+  $('#sheetGo').onclick = () => { location.href = 'https://azan-clock-store.vercel.app'; };
+}
+const closeSheet = () => { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); };
+$('#sheetClose').onclick = closeSheet;
+$('#scrim').onclick = closeSheet;
+document.addEventListener('click', (e) => {
+  const open = e.target.closest('[data-open]');
+  if (open) { openSheet(open.dataset.open); return; }
+  const q = e.target.closest('[data-q]');
+  if (q) { sheetQty = clamp(sheetQty + Number(q.dataset.q), 1, 9); drawSheet(); }
+});
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); } });
+
+/* ---------- boot ---------- */
+heroClock();
+nightTicks();
+renderRail();
+reveals();
+setNightHands(0);
+onScroll();
+window.__errs = [];
+addEventListener('error', (e) => window.__errs.push(e.message));
+</script>
+</body>
+</html>
