@@ -32,3 +32,7 @@ python3 -m http.server 8140    # open http://localhost:8140
 
 This is the design concept. The working store with cart, checkout and the owner's Orders panel
 lives at https://azan-clock-store.vercel.app
+
+## Live
+
+https://azan-clock-concept.vercel.app
