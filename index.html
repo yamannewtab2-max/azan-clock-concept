@@ -131,32 +131,43 @@
   .act2 .tail .n{font-family:var(--mono);font-size:34px;font-weight:300;letter-spacing:-.03em;color:var(--brass-2)}
   .act2 .tail .l{margin-top:8px;font-size:13px;color:#9E9B8A;max-width:30ch}
 
-  /* ============ ACT III — the rail ============ */
-  .act3{background:var(--paper);padding:14vh 0 10vh;overflow:hidden}
-  .act3 .head{max-width:1360px;margin:0 auto;padding:0 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px}
+  /* ============ ACT III — the catalog ============ */
+  .act3{background:var(--paper);padding:13vh 0 9vh}
+  .act3 .head{max-width:1360px;margin:0 auto;padding:0 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap}
   .act3 .head h2{font-size:clamp(34px,5.4vw,76px);font-weight:300;line-height:.98}
   .act3 .head h2 em{font-style:italic;color:var(--brass)}
-  .act3 .head .hint{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-  .railwrap{margin-top:7vh;position:relative;height:440px}
-  .rail{display:flex;gap:26px;padding:0 28px;height:100%;will-change:transform}
-  .pcard{flex:0 0 clamp(300px,32vw,420px);background:#FFFDF7;border:1px solid rgba(22,21,15,.13);
-    border-radius:3px;padding:24px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  .act3 .head .count{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .cats{max-width:1360px;margin:32px auto 0;padding:0 28px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .cats button{height:38px;padding:0 16px;border-radius:99px;border:1px solid rgba(22,21,15,.18);background:none;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;
+    transition:.25s var(--ease);display:flex;align-items:center;gap:9px}
+  .cats button:hover{border-color:var(--ink)}
+  .cats button.on{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+  .cats button i{font-style:normal;opacity:.5}
+  .catalog{max-width:1360px;margin:36px auto 0;padding:0 28px;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:22px}
+  .pcard{background:#FFFDF7;border:1px solid rgba(22,21,15,.13);border-radius:3px;padding:22px;
+    display:flex;flex-direction:column;position:relative;overflow:hidden;
     box-shadow:0 1px 0 rgba(22,21,15,.05),0 24px 40px -38px rgba(22,21,15,.5);
-    transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
-  .pcard:hover{transform:translateY(-8px);box-shadow:0 1px 0 rgba(22,21,15,.05),0 46px 70px -46px rgba(22,21,15,.55)}
-  .pcard .idx{position:absolute;top:20px;right:24px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.2em}
-  .pcard .art{flex:1;display:grid;place-items:center;padding:8px 0}
-  .pcard .art svg{width:min(62%,196px);height:auto}
-  .pcard h3{font-size:23px;font-weight:500;line-height:1.15;border-top:1px solid rgba(22,21,15,.10);padding-top:16px}
-  .pcard .tl{color:var(--muted);font-size:13px;margin-top:6px;min-height:38px}
-  .pcard .specs{display:flex;gap:18px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(22,21,15,.14);
-    font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-  .pcard .buy{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
-  .pcard .pr{font-family:var(--mono);font-size:16px}
-  .pcard .btnbuy{height:36px}
-  .rail-scrollbar{max-width:1360px;margin:34px auto 0;padding:0 28px}
-  .rail-scrollbar .track{height:1px;background:rgba(22,21,15,.16);position:relative}
-  .rail-scrollbar .thumb{position:absolute;top:-1px;height:3px;background:var(--ink);width:20%;transition:transform .1s linear}
+    transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .4s var(--ease)}
+  .pcard:hover{transform:translateY(-8px);border-color:rgba(22,21,15,.32);
+    box-shadow:0 1px 0 rgba(22,21,15,.05),0 46px 70px -46px rgba(22,21,15,.55)}
+  .pcard .family{position:absolute;top:20px;right:22px;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--faint)}
+  .pcard .flag{position:absolute;top:20px;left:22px;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--brass)}
+  .pcard .art{display:grid;place-items:center;height:206px;margin:12px 0 2px}
+  .pcard .art svg{width:min(88%,206px);max-height:100%;height:auto;transition:transform .6s var(--ease)}
+  .pcard:hover .art svg{transform:scale(1.05)}
+  .pcard h3{font-size:19.5px;font-weight:500;line-height:1.16;border-top:1px solid rgba(22,21,15,.10);padding-top:15px}
+  .pcard .tl{color:var(--muted);font-size:12.5px;margin-top:6px;min-height:34px}
+  .pcard .specs{display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid rgba(22,21,15,.10);
+    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+  .pcard .buy{display:flex;align-items:center;justify-content:space-between;margin-top:15px;gap:10px}
+  .pcard .pr{font-family:var(--mono);font-size:15.5px}
+  .pcard .btnbuy{height:34px;padding:0 15px}
+  .cat-note{max-width:1360px;margin:28px auto 0;padding:0 28px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;color:var(--muted)}
 
   /* ============ ACT IV — the specs ============ */
   .act4{background:var(--bone);padding:12vh 0}
@@ -225,9 +236,7 @@
     .prayers li .nm{font-size:24px}
     .act4 .in{grid-template-columns:1fr;gap:30px}
     .act2 .tail{grid-template-columns:1fr;gap:20px}
-    .railwrap{height:auto}
-    .rail{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:14px}
-    .pcard{scroll-snap-align:center}
+    .catalog{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
     .sheet-in{grid-template-columns:1fr;gap:18px}
     .nav nav{display:none}
   }
@@ -256,7 +265,7 @@
     <a href="#clocks">Clocks</a>
     <a href="#specs">Specs</a>
   </nav>
-  <button class="btnbuy" data-open="az-led">Order</button>
+  <button class="btnbuy" data-open="c-02">Order</button>
 </header>
 
 <!-- ================= ACT I ================= -->
@@ -336,20 +345,19 @@
   </div>
 </section>
 
-<!-- ================= ACT III — rail ================= -->
+<!-- ================= ACT III — the catalog ================= -->
 <section class="act3" id="clocks">
   <div class="head">
     <div>
-      <div class="kicker rv">Act III — the clocks</div>
-      <h2 class="rv" style="margin-top:18px;transition-delay:.06s">Pick the one<br>that fits the <em>room</em>.</h2>
+      <div class="kicker rv">Act III — the collection</div>
+      <h2 class="rv" style="margin-top:18px;transition-delay:.06s">Twelve models.<br>Wrist, wall, <em>table</em>.</h2>
     </div>
-    <div class="hint">Drag / scroll →</div>
+    <div class="count rv" style="transition-delay:.1s" id="catCount">12 models · 3 families</div>
   </div>
 
-  <div class="railwrap">
-    <div class="rail" id="rail"></div>
-  </div>
-  <div class="rail-scrollbar"><div class="track"><div class="thumb" id="thumb"></div></div></div>
+  <div class="cats rv" id="cats" style="transition-delay:.14s"></div>
+  <div class="catalog" id="catalog"></div>
+  <div class="cat-note">Prices are placeholders — send the real list and it drops straight in.</div>
 </section>
 
 <!-- ================= ACT IV ================= -->
@@ -382,8 +390,8 @@
     <h2 class="rv" style="margin-top:20px;transition-delay:.06s">Put it on the wall.<br>We <em>deliver</em> it.</h2>
     <div class="price rv" style="transition-delay:.12s">From Rp 189.000 · QRIS, transfer or cash to the courier</div>
     <div class="cta rv" style="transition-delay:.18s">
-      <button class="solid" data-open="az-led">Order the LED</button>
-      <button class="ghost" data-open="az-grand">The grand edition</button>
+      <button class="solid" data-open="w-04">Order the wrist</button>
+      <button class="ghost" data-open="c-04">The grand wall clock</button>
     </div>
     <footer>
       <span>Azan Clock Store · Pacet, Cianjur</span>
@@ -412,46 +420,95 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const idr = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
+/* ---------- the collection: 12 models, three families ----------
+   Prices are placeholders — the owner sends the real list and it replaces this block. */
+const FAMILIES = [
+  { key:'wrist', label:'Wristwatch', short:'Wrist' },
+  { key:'wall',  label:'Wall clock', short:'Wall' },
+  { key:'table', label:'Table watch', short:'Table' },
+];
 const PRODUCTS = [
-  { id:'az-clsc', name:'Classic — Wood', tagline:'Full azan, Hijri date, rattan case.', price:189000, specs:['Rattan','12 in','4 cities'] },
-  { id:'az-led', name:'LED Digital — Black', tagline:'Three-inch digits you can read across the room.', price:249000, specs:['3″ LED','5 azan','8 cities'], badge:'Most taken' },
-  { id:'az-hijri', name:'Hijri Premium', tagline:'Hijri and Gregorian side by side, 8 presets.', price:329000, specs:['Dual date','8 cities','72 dB'] },
-  { id:'az-square', name:'Square — Masjid', tagline:'Built for a musalla wall, loud and simple.', price:215000, specs:['Masjid','15 in','Remote'] },
-  { id:'az-grand', name:'Grand Mosque', tagline:'Remote, temperature, eight-month memory.', price:449000, specs:['Remote','Temp','8 mo'], badge:'Best' },
+  // wristwatches — the azan on your arm
+  { id:'w-01', cat:'wrist', name:'Wrist Classic — Leather', tagline:'Azan on the wrist, five times a day.', price:289000, specs:['36 mm','Leather','5 azan'], flag:'New' },
+  { id:'w-02', cat:'wrist', name:'Wrist Steel — Bracelet', tagline:'Brushed steel, silent vibration azan.', price:349000, specs:['40 mm','Steel','Vibrate'] },
+  { id:'w-03', cat:'wrist', name:'Wrist Sport — Silicone', tagline:'For kerja, jalan and the gym.', price:259000, specs:['42 mm','Silicone','WR50'] },
+  { id:'w-04', cat:'wrist', name:'Wrist Slim — Dress', tagline:'Six millimetres thick under a cuff.', price:319000, specs:['38 mm','6 mm','Hijri'], flag:'Best' },
+  // wall clocks — the room
+  { id:'c-01', cat:'wall', name:'Wall Classic — Rattan', tagline:'Rattan case, brass hands, 12 inch.', price:189000, specs:['12 in','Rattan','72 dB'] },
+  { id:'c-02', cat:'wall', name:'Wall LED — Digital', tagline:'Three-inch digits you read across the room.', price:249000, specs:['3″ LED','8 cities','Remote'], flag:'Most taken' },
+  { id:'c-03', cat:'wall', name:'Wall Square — Masjid', tagline:'Built for a musalla wall, loud and simple.', price:215000, specs:['15 in','Masjid','Remote'] },
+  { id:'c-04', cat:'wall', name:'Wall Grand — Mosque', tagline:'Remote, temperature, eight-month memory.', price:449000, specs:['16 in','Remote','8 mo'] },
+  // table watches — the bedside
+  { id:'t-01', cat:'table', name:'Table Wood — Desk', tagline:'Stands on a desk, tilts to any angle.', price:199000, specs:['Wood','Tilt','5 azan'] },
+  { id:'t-02', cat:'table', name:'Table LED — Bedside', tagline:'Dims itself at night, lights up at Fajr.', price:229000, specs:['LED','Dim','Alarm'] },
+  { id:'t-03', cat:'table', name:'Table Mini — Travel', tagline:'Folds flat, fits a bag, keeps the times.', price:179000, specs:['Fold','USB','8 cities'] },
+  { id:'t-04', cat:'table', name:'Table Grand — Brass', tagline:'Brass base, the one you keep for years.', price:399000, specs:['Brass','Weight','Hijri'], flag:'Best' },
 ];
 
-/* ---------- hand-drawn clock art (per product) ---------- */
+/* ---------- product art: one silhouette per family (photos replace these) ----------
+   Drawn rather than photographed: the clock face is the product, so a clean
+   dial in the right case reads honestly until real photos arrive. */
 const BRASS = ['#C9A227', '#B8901C', '#D9B44A', '#A8811F'];
-function clockArt(p, opts) {
+function dial(accent, r, opts) {
   opts = opts || {};
-  let h = 0; for (let i = 0; i < p.id.length; i++) h = (h * 31 + p.id.charCodeAt(i)) % 360;
-  const accent = BRASS[Math.abs(h) % BRASS.length];
-  const square = p.id === 'az-square';
-  const led = p.id === 'az-led';
   const ticks = Array.from({ length: 12 }, (_, i) =>
-    `<line x1="150" y1="36" x2="150" y2="${i % 3 === 0 ? 50 : 44}" stroke="${accent}"
+    `<line x1="150" y1="${150 - r + 6}" x2="150" y2="${150 - r + (i % 3 === 0 ? 20 : 14)}" stroke="${accent}"
       stroke-width="${i % 3 === 0 ? 2.6 : 1.2}" opacity="${i % 3 === 0 ? 1 : .5}" stroke-linecap="round"
       transform="rotate(${i * 30} 150 150)"/>`).join('');
-  if (led) {
+  return `${ticks}
+    <text x="150" y="${150 - r + 34}" text-anchor="middle" fill="${accent}" font-family="monospace"
+      font-size="${opts.small ? 7 : 9}" letter-spacing="4">AZAN</text>
+    <line x1="150" y1="150" x2="150" y2="${150 - r * .58}" stroke="#F2EDE2" stroke-width="${opts.small ? 5 : 6.5}" stroke-linecap="round"/>
+    <line x1="150" y1="150" x2="${150 + r * .4}" y2="${150 - r * .32}" stroke="#F2EDE2" stroke-width="${opts.small ? 3.4 : 4.2}" stroke-linecap="round"/>
+    <line x1="150" y1="150" x2="150" y2="${150 - r * .82}" stroke="${accent}" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="150" cy="150" r="4" fill="${accent}"/>`;
+}
+function productArt(p) {
+  let h = 0; for (let i = 0; i < p.id.length; i++) h = (h * 31 + p.id.charCodeAt(i)) % 360;
+  const accent = BRASS[Math.abs(h) % BRASS.length];
+
+  if (p.cat === 'wrist') {
     return `<svg viewBox="0 0 300 300" aria-hidden="true">
-      <rect x="26" y="70" width="248" height="150" rx="10" fill="#0E110C" stroke="${accent}" stroke-width="1.4" opacity=".95"/>
-      <text x="150" y="152" text-anchor="middle" fill="${accent}" font-family="monospace" font-size="52" letter-spacing="2">4:38</text>
-      <text x="150" y="188" text-anchor="middle" fill="#8C8877" font-family="monospace" font-size="12" letter-spacing="6">FAJR</text>
-      <text x="150" y="94" text-anchor="middle" fill="#8C8877" font-family="monospace" font-size="9" letter-spacing="5">28 SAFAR 1448</text>
-      <rect x="26" y="220" width="248" height="10" rx="5" fill="${accent}" opacity=".35"/>
+      <rect x="112" y="4" width="76" height="84" rx="16" fill="#171A14"/>
+      <rect x="112" y="212" width="76" height="84" rx="16" fill="#171A14"/>
+      <rect x="118" y="34" width="64" height="232" rx="10" fill="none" stroke="#2A2D24" stroke-width="1"/>
+      <circle cx="150" cy="150" r="76" fill="#0E110C" stroke="${accent}" stroke-width="2"/>
+      <circle cx="150" cy="150" r="66" fill="none" stroke="${accent}" stroke-width=".6" opacity=".5"/>
+      ${dial(accent, 66, { small: true })}
+      <rect x="226" y="142" width="7" height="16" rx="3" fill="${accent}"/>
     </svg>`;
   }
-  const box = square
-    ? `<rect x="30" y="30" width="240" height="240" rx="8" fill="#0E110C" stroke="${accent}" stroke-width="1.4"/>`
-    : `<circle cx="150" cy="150" r="120" fill="#0E110C" stroke="${accent}" stroke-width="1.4"/>
-       <circle cx="150" cy="150" r="130" fill="none" stroke="${accent}" stroke-width=".6" opacity=".45"/>`;
+
+  if (p.cat === 'table') {
+    return `<svg viewBox="0 0 300 300" aria-hidden="true">
+      <path d="M118 196 L150 232 L182 196 Z" fill="#171A14"/>
+      <rect x="96" y="228" width="108" height="9" rx="4" fill="${accent}" opacity=".9"/>
+      <rect x="104" y="237" width="92" height="6" rx="3" fill="#2A2D24"/>
+      <circle cx="150" cy="118" r="82" fill="#0E110C" stroke="${accent}" stroke-width="2"/>
+      <circle cx="150" cy="118" r="72" fill="none" stroke="${accent}" stroke-width=".6" opacity=".5"/>
+      <g transform="translate(0,-32)">${dial(accent, 72, { small: true })}</g>
+      <text x="150" y="58" text-anchor="middle" fill="#7C7A68" font-family="monospace" font-size="8" letter-spacing="3">TABLE</text>
+    </svg>`;
+  }
+
+  // wall clock — round dial in a brass ring; the LED model is a screen
+  if (p.id === 'c-02') {
+    return `<svg viewBox="0 0 300 300" aria-hidden="true">
+      <rect x="20" y="74" width="260" height="152" rx="12" fill="#0E110C" stroke="${accent}" stroke-width="1.6"/>
+      <text x="150" y="80" text-anchor="middle" fill="#7C7A68" font-family="monospace" font-size="9" letter-spacing="5">28 SAFAR 1448</text>
+      <text x="150" y="164" text-anchor="middle" fill="${accent}" font-family="monospace" font-size="54" letter-spacing="2">4:38</text>
+      <text x="150" y="192" text-anchor="middle" fill="#8C8877" font-family="monospace" font-size="12" letter-spacing="6">FAJR</text>
+      <rect x="20" y="226" width="260" height="9" rx="4" fill="${accent}" opacity=".35"/>
+      <path d="M150 40 l5 10 -5 10 -5 -10 z" fill="${accent}"/>
+    </svg>`;
+  }
   return `<svg viewBox="0 0 300 300" aria-hidden="true">
-    ${box}${ticks}
-    <text x="150" y="104" text-anchor="middle" fill="${accent}" font-family="monospace" font-size="9" letter-spacing="4.5">AZAN</text>
-    <line x1="150" y1="150" x2="150" y2="88" stroke="#F2EDE2" stroke-width="6.5" stroke-linecap="round"/>
-    <line x1="150" y1="150" x2="196" y2="112" stroke="#F2EDE2" stroke-width="4.2" stroke-linecap="round"/>
-    <line x1="150" y1="150" x2="150" y2="${opts.second || 52}" stroke="${accent}" stroke-width="1.4" stroke-linecap="round"/>
-    <circle cx="150" cy="150" r="4.6" fill="${accent}"/>
+    <path d="M150 22 l4 8 -4 8 -4 -8 z" fill="none" stroke="${accent}" stroke-width="1.2"/>
+    <circle cx="150" cy="166" r="98" fill="${accent}" opacity=".92"/>
+    <circle cx="150" cy="166" r="90" fill="#0E110C"/>
+    <circle cx="150" cy="166" r="82" fill="none" stroke="${accent}" stroke-width=".8" opacity=".6"/>
+    <g transform="translate(0,16)">${dial(accent, 82, { small: true })}</g>
+    <text x="150" y="126" text-anchor="middle" fill="#7C7A68" font-family="monospace" font-size="8" letter-spacing="4">AL-HARAMAIN</text>
   </svg>`;
 }
 
@@ -504,12 +561,23 @@ function setNightHands(a) {
   $('#legRight').textContent = active === PRAYERS.length - 1 ? 'Isha — day complete' : 'Press and hold: 3 s';
 }
 
-/* ---------- ACT III: the rail ---------- */
-function renderRail() {
-  $('#rail').innerHTML = PRODUCTS.map((p, i) => `
-    <article class="pcard">
-      <span class="idx">${String(i + 1).padStart(2, '0')}${p.badge ? ' · ' + p.badge.toUpperCase() : ''}</span>
-      <div class="art">${clockArt(p, { second: 56 - i * 4 })}</div>
+/* ---------- ACT III: the catalog ---------- */
+let activeCat = 'all';
+function renderCats() {
+  const counts = { all: PRODUCTS.length };
+  FAMILIES.forEach((f) => { counts[f.key] = PRODUCTS.filter((p) => p.cat === f.key).length; });
+  $('#cats').innerHTML = [{ key:'all', label:'All' }].concat(FAMILIES).map((f) => `
+    <button data-cat="${f.key}" class="${activeCat === f.key ? 'on' : ''}">${esc(f.label)} <i>${counts[f.key]}</i></button>`).join('');
+  $$('#cats button').forEach((b) => b.onclick = () => { activeCat = b.dataset.cat; renderCatalog(); });
+}
+function renderCatalog() {
+  const list = activeCat === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.cat === activeCat);
+  const fam = (k) => (FAMILIES.find((f) => f.key === k) || {}).short || '';
+  $('#catalog').innerHTML = list.map((p, i) => `
+    <article class="pcard rv" style="transition-delay:${Math.min(i * 55, 500)}ms">
+      <span class="family">${esc(fam(p.cat))}</span>
+      ${p.flag ? `<span class="flag">${esc(p.flag)}</span>` : ''}
+      <div class="art">${productArt(p)}</div>
       <h3>${esc(p.name)}</h3>
       <div class="tl">${esc(p.tagline)}</div>
       <div class="specs">${p.specs.map((s) => `<span>${esc(s)}</span>`).join('')}</div>
@@ -518,6 +586,11 @@ function renderRail() {
         <button class="btnbuy" data-open="${p.id}">Order</button>
       </div>
     </article>`).join('');
+  const catLabel = (FAMILIES.find((f) => f.key === activeCat) || {}).label || '';
+  $('#catCount').textContent = `${list.length} model${list.length === 1 ? '' : 's'}` +
+    (activeCat === 'all' ? ' · 3 families' : ' · ' + catLabel.toLowerCase());
+  renderCats();
+  revealCheck();
 }
 
 /* ---------- scroll engine ---------- *
@@ -556,16 +629,6 @@ function onScroll() {
     const prog = clamp((y - docTop(wrapEl)) / dist, 0, 1);
     setNightHands(prog);
     $('#pinBar').style.transform = `scaleX(${prog})`;
-
-    // rail: horizontal translation on desktop
-    const rw = $('.railwrap');
-    if (window.innerWidth > 1024 && !REDUCE) {
-      const rail = $('#rail');
-      const overflow = rail.scrollWidth - window.innerWidth + 56;
-      const rp = clamp((y - (docTop(rw) - vh)) / (rw.offsetHeight + vh), 0, 1);
-      rail.style.transform = `translateX(${-overflow * rp}px)`;
-      $('#thumb').style.transform = `translateX(${rp * 400}%)`;
-    }
 
     revealCheck();
     ticking = false;
@@ -613,7 +676,7 @@ function openSheet(id) {
 function drawSheet() {
   const p = sheetProduct;
   $('#sheetIn').innerHTML = `
-    <div class="art">${clockArt(p, { second: 54 })}</div>
+    <div class="art">${productArt(p)}</div>
     <div>
       <div class="kicker">${esc(p.specs.join(' · '))}</div>
       <h3 style="margin-top:12px">${esc(p.name)}</h3>
@@ -642,7 +705,7 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('#sheet').class
 /* ---------- boot ---------- */
 heroClock();
 nightTicks();
-renderRail();
+renderCatalog();
 reveals();
 setNightHands(0);
 onScroll();
